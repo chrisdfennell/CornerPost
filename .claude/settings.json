@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp /tmp/shot.mjs ./_shot.mjs)",
+      "Bash(node ./_shot.mjs)",
+      "Bash(git -c 'user.name=Christopher Fennell' -c user.email=infantrykiller@gmail.com commit -q -m 'Initial commit: CornerPost — modern local classifieds *)",
+      "Bash(git --no-pager log --oneline -1)",
+      "Bash(git --no-pager ls-files)"
+    ]
+  }
+}

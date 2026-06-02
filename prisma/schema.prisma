@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Listing {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  price       Int? // in whole currency units; null = "contact"/free/NA
+  category    String // top-level category slug, e.g. "for-sale"
+  subcategory String // subcategory slug, e.g. "electronics"
+  location    String
+  condition   String? // e.g. "new", "like-new", "good", "fair"
+  imageUrl    String?
+  contactName String
+  contactEmail String
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([subcategory])
+  @@index([createdAt])
+}

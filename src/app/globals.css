@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+
+  --color-brand-50: #eef6ff;
+  --color-brand-100: #d9eaff;
+  --color-brand-200: #bcd9ff;
+  --color-brand-300: #8ec0ff;
+  --color-brand-400: #599cff;
+  --color-brand-500: #2f76f6;
+  --color-brand-600: #1a57e0;
+  --color-brand-700: #1644b5;
+  --color-brand-800: #183b8f;
+  --color-brand-900: #193672;
+
+  --color-ink: #0f172a;
+}
+
+@layer base {
+  :root {
+    --bg: #f7f8fb;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Decorative background mesh on the marketing surfaces */
+  .hero-mesh {
+    background-image:
+      radial-gradient(60% 60% at 15% 0%, rgba(47, 118, 246, 0.18), transparent 60%),
+      radial-gradient(50% 70% at 100% 0%, rgba(16, 185, 129, 0.16), transparent 55%),
+      radial-gradient(40% 60% at 70% 100%, rgba(244, 63, 94, 0.10), transparent 60%);
+  }
+}
+
+@layer utilities {
+  .card-shadow {
+    box-shadow:
+      0 1px 2px rgba(15, 23, 42, 0.04),
+      0 4px 16px rgba(15, 23, 42, 0.06);
+  }
+  .card-shadow-hover {
+    box-shadow:
+      0 4px 12px rgba(15, 23, 42, 0.08),
+      0 18px 40px rgba(15, 23, 42, 0.12);
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}

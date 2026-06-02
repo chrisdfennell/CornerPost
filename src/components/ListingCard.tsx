@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import { formatPrice, timeAgo } from "@/lib/format";
+import { formatPrice, timeAgo, closedLabel } from "@/lib/format";
 import { getCategory } from "@/lib/categories";
+import { FavoriteButton } from "./FavoriteButton";
 
 export type ListingCardData = {
   id: string;
@@ -12,11 +13,13 @@ export type ListingCardData = {
   location: string;
   imageUrl: string | null;
   featured: boolean;
+  status?: string;
   createdAt: Date | string;
 };
 
 export function ListingCard({ listing }: { listing: ListingCardData }) {
   const cat = getCategory(listing.category);
+  const closed = listing.status && listing.status !== "active";
 
   return (
     <Link
@@ -30,12 +33,22 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
             alt={listing.title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className={`object-cover transition-transform duration-300 group-hover:scale-105 ${
+              closed ? "opacity-60 grayscale" : ""
+            }`}
           />
         ) : (
           <div className="grid h-full w-full place-items-center text-4xl">
             {cat?.icon ?? "📦"}
           </div>
+        )}
+
+        <FavoriteButton listingId={listing.id} />
+
+        {closed && (
+          <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 bg-ink/70 py-1.5 text-center text-sm font-bold uppercase tracking-wide text-white">
+            {closedLabel(listing.category)}
+          </span>
         )}
 
         {listing.featured && (

@@ -1,8 +1,12 @@
 import { PostForm } from "./PostForm";
+import { currentPlace } from "@/lib/place-server";
 
 export const metadata = { title: "Post a listing · CornerPost" };
+export const dynamic = "force-dynamic";
 
-export default function PostPage() {
+export default async function PostPage() {
+  const place = await currentPlace();
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
       <div className="text-center">
@@ -14,7 +18,10 @@ export default function PostPage() {
         </p>
       </div>
       <div className="mt-8">
-        <PostForm />
+        <PostForm
+          defaultPlace={place?.slug}
+          uploadsEnabled={Boolean(process.env.UPLOADTHING_TOKEN)}
+        />
       </div>
     </div>
   );

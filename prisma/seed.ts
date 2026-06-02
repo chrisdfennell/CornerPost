@@ -331,6 +331,26 @@ const LISTINGS: Seed[] = [
   },
 ];
 
+// Map each demo listing's display location to a metro slug from places.ts.
+const PLACE_BY_LOCATION: Record<string, string> = {
+  "Brooklyn, NY": "new-york",
+  "Portland, OR": "portland",
+  "Austin, TX": "austin",
+  "Seattle, WA": "seattle",
+  "Denver, CO": "denver",
+  "Chicago, IL": "chicago",
+  "Pittsburgh, PA": "pittsburgh",
+  "Boston, MA": "boston",
+  "Columbus, OH": "columbus",
+  "Nashville, TN": "nashville",
+  "Minneapolis, MN": "minneapolis",
+  "San Diego, CA": "san-diego",
+  "Sacramento, CA": "sacramento",
+  "Asheville, NC": "asheville",
+  "Remote (US)": "seattle",
+  Remote: "portland",
+};
+
 async function main() {
   console.log("Clearing existing listings…");
   await prisma.listing.deleteMany();
@@ -340,6 +360,11 @@ async function main() {
     const createdAt = new Date(
       Date.now() - (l.daysAgo ?? 0) * 24 * 60 * 60 * 1000
     );
+    // Match the app's 30-day TTL, measured from when the listing was posted.
+    const expiresAt = new Date(
+      createdAt.getTime() + 30 * 24 * 60 * 60 * 1000
+    );
+    const place = PLACE_BY_LOCATION[l.location] ?? "new-york";
     await prisma.listing.create({
       data: {
         title: l.title,
@@ -347,6 +372,7 @@ async function main() {
         price: l.price ?? null,
         category: l.category,
         subcategory: l.subcategory,
+        place,
         location: l.location,
         condition: l.condition ?? null,
         imageUrl: l.imageUrl ?? null,
@@ -355,6 +381,7 @@ async function main() {
         featured: l.featured ?? false,
         createdAt,
         updatedAt: createdAt,
+        expiresAt,
       },
     });
   }

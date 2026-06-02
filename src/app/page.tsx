@@ -1,16 +1,19 @@
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/categories";
 import { getListings, getCategoryCounts } from "@/lib/listings";
+import { currentPlace } from "@/lib/place-server";
 import { ListingGrid } from "@/components/ListingGrid";
 import { SearchBar } from "@/components/SearchBar";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  const place = await currentPlace();
+  const slug = place?.slug;
   const [{ items: featured }, { items: recent }, counts] = await Promise.all([
-    getListings({ take: 4, sort: "newest" }),
-    getListings({ take: 8, sort: "newest" }),
-    getCategoryCounts(),
+    getListings({ place: slug, take: 4, sort: "newest" }),
+    getListings({ place: slug, take: 8, sort: "newest" }),
+    getCategoryCounts(slug),
   ]);
 
   const featuredOnly = featured.filter((l) => l.featured).slice(0, 4);
@@ -24,7 +27,8 @@ export default async function HomePage() {
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-sm font-medium text-slate-600 backdrop-blur">
               <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-              {totalListings.toLocaleString()} live listings near you
+              {totalListings.toLocaleString()} live listings
+              {place ? ` in ${place.name}` : " near you"}
             </span>
             <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight text-ink sm:text-6xl">
               Your corner of the

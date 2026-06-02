@@ -3,18 +3,53 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CATEGORIES, CONDITIONS, getCategory } from "@/lib/categories";
+import { STATES, PLACES } from "@/lib/places";
+import { ImageUploader } from "@/components/ImageUploader";
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-100";
 
 const labelClass = "block text-sm font-semibold text-ink";
 
-export function PostForm() {
+export type PostFormListing = {
+  id: string;
+  title: string;
+  description: string;
+  price: number | null;
+  category: string;
+  subcategory: string;
+  place: string;
+  location: string;
+  condition: string | null;
+  images: string[];
+  contactName: string;
+  contactEmail: string;
+};
+
+export function PostForm({
+  listing,
+  editToken,
+  defaultPlace,
+  uploadsEnabled = false,
+}: {
+  listing?: PostFormListing;
+  editToken?: string;
+  defaultPlace?: string;
+  uploadsEnabled?: boolean;
+}) {
   const router = useRouter();
-  const [category, setCategory] = useState(CATEGORIES[0].slug);
-  const [subcategory, setSubcategory] = useState(
-    CATEGORIES[0].subcategories[0].slug
+  const isEdit = Boolean(listing && editToken);
+
+  const [category, setCategory] = useState(
+    listing?.category ?? CATEGORIES[0].slug
   );
+  const [subcategory, setSubcategory] = useState(
+    listing?.subcategory ?? CATEGORIES[0].subcategories[0].slug
+  );
+  const [place, setPlace] = useState(
+    listing?.place ?? defaultPlace ?? PLACES[0].slug
+  );
+  const [images, setImages] = useState<string[]>(listing?.images ?? []);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,26 +77,38 @@ export function PostForm() {
       price: priceRaw === "" ? null : Number(priceRaw),
       category,
       subcategory,
+      place,
       location: form.get("location"),
       condition: (form.get("condition") as string) || null,
-      imageUrl: ((form.get("imageUrl") as string) || "").trim(),
+      images,
       contactName: form.get("contactName"),
       contactEmail: form.get("contactEmail"),
+      company: (form.get("company") as string) || "",
+      ...(isEdit ? { token: editToken } : {}),
     };
 
     try {
-      const res = await fetch("/api/listings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        isEdit ? `/api/listings/${listing!.id}` : "/api/listings",
+        {
+          method: isEdit ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? "Something went wrong");
         setSubmitting(false);
         return;
       }
-      router.push(`/listing/${data.listing.id}`);
+      if (isEdit) {
+        router.push(`/listing/${listing!.id}`);
+      } else {
+        router.push(
+          `/listing/${data.listing.id}/manage?token=${data.editToken}&posted=1`
+        );
+      }
     } catch {
       setError("Network error — please try again");
       setSubmitting(false);
@@ -75,6 +122,12 @@ export function PostForm() {
       onSubmit={onSubmit}
       className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 card-shadow sm:p-8"
     >
+      {/* Honeypot — hidden from real users, catches naive bots. */}
+      <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+        <label htmlFor="company">Company (leave blank)</label>
+        <input id="company" name="company" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
+
       {/* Category */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
@@ -122,6 +175,7 @@ export function PostForm() {
           name="title"
           required
           maxLength={120}
+          defaultValue={listing?.title}
           placeholder="e.g. Mid-century walnut credenza"
           className={`${inputClass} mt-1.5`}
         />
@@ -136,9 +190,32 @@ export function PostForm() {
           name="description"
           required
           rows={6}
+          defaultValue={listing?.description}
           placeholder="Describe the item, condition, why you're posting, pickup details…"
           className={`${inputClass} mt-1.5 resize-y`}
         />
+      </div>
+
+      <div>
+        <label className={labelClass} htmlFor="place">
+          City / area
+        </label>
+        <select
+          id="place"
+          value={place}
+          onChange={(e) => setPlace(e.target.value)}
+          className={`${inputClass} mt-1.5`}
+        >
+          {STATES.map((s) => (
+            <optgroup key={s.code} label={s.name}>
+              {s.metros.map((m) => (
+                <option key={m.slug} value={m.slug}>
+                  {m.name}, {s.code}
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -156,6 +233,7 @@ export function PostForm() {
               type="number"
               min={0}
               step={1}
+              defaultValue={listing?.price ?? undefined}
               placeholder="0 for free"
               className={`${inputClass} pl-7`}
             />
@@ -163,14 +241,15 @@ export function PostForm() {
         </div>
         <div>
           <label className={labelClass} htmlFor="location">
-            Location
+            Neighborhood / detail
           </label>
           <input
             id="location"
             name="location"
             required
             maxLength={120}
-            placeholder="City, State"
+            defaultValue={listing?.location}
+            placeholder="e.g. Capitol Hill, or Remote"
             className={`${inputClass} mt-1.5`}
           />
         </div>
@@ -184,7 +263,7 @@ export function PostForm() {
           <select
             id="condition"
             name="condition"
-            defaultValue=""
+            defaultValue={listing?.condition ?? ""}
             className={`${inputClass} mt-1.5`}
           >
             <option value="">Not specified</option>
@@ -198,19 +277,16 @@ export function PostForm() {
       )}
 
       <div>
-        <label className={labelClass} htmlFor="imageUrl">
-          Image URL <span className="font-normal text-slate-400">(optional)</span>
+        <label className={labelClass}>
+          Photos <span className="font-normal text-slate-400">(optional, up to 8)</span>
         </label>
-        <input
-          id="imageUrl"
-          name="imageUrl"
-          type="url"
-          placeholder="https://…"
-          className={`${inputClass} mt-1.5`}
-        />
-        <p className="mt-1 text-xs text-slate-400">
-          Paste a link to a photo. (A real upload flow would go here.)
-        </p>
+        <div className="mt-1.5">
+          <ImageUploader
+            value={images}
+            onChange={setImages}
+            uploadsEnabled={uploadsEnabled}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 border-t border-slate-100 pt-6 sm:grid-cols-2">
@@ -223,6 +299,7 @@ export function PostForm() {
             name="contactName"
             required
             maxLength={80}
+            defaultValue={listing?.contactName}
             placeholder="Jamie"
             className={`${inputClass} mt-1.5`}
           />
@@ -236,6 +313,7 @@ export function PostForm() {
             name="contactEmail"
             type="email"
             required
+            defaultValue={listing?.contactEmail}
             placeholder="you@example.com"
             className={`${inputClass} mt-1.5`}
           />
@@ -253,7 +331,13 @@ export function PostForm() {
         disabled={submitting}
         className="flex w-full items-center justify-center gap-2 rounded-full bg-brand-600 px-6 py-3.5 font-semibold text-white transition hover:bg-brand-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {submitting ? "Posting…" : "Publish listing"}
+        {submitting
+          ? isEdit
+            ? "Saving…"
+            : "Posting…"
+          : isEdit
+            ? "Save changes"
+            : "Publish listing"}
       </button>
     </form>
   );

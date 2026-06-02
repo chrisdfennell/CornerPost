@@ -1,13 +1,22 @@
 import { notFound } from "next/navigation";
 import { getCategory } from "@/lib/categories";
-import { getListings } from "@/lib/listings";
+import { getListings, PAGE_SIZE } from "@/lib/listings";
+import { currentPlace } from "@/lib/place-server";
 import { ListingGrid } from "@/components/ListingGrid";
 import { SortSelect } from "@/components/SortSelect";
+import { PriceFilter } from "@/components/PriceFilter";
+import { Pagination } from "@/components/Pagination";
 import { SubcategoryChips } from "@/components/SubcategoryChips";
 import type { ListingFilter } from "@/lib/listings";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+function num(v: string | undefined): number | undefined {
+  if (v === undefined || v.trim() === "") return undefined;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : undefined;
+}
 
 export async function generateMetadata({
   params,
@@ -24,18 +33,31 @@ export default async function CategoryPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ sub?: string; sort?: string }>;
+  searchParams: Promise<{
+    sub?: string;
+    sort?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    page?: string;
+  }>;
 }) {
   const { slug } = await params;
-  const { sub, sort } = await searchParams;
+  const sp = await searchParams;
+  const { sub, sort } = sp;
   const cat = getCategory(slug);
   if (!cat) notFound();
 
+  const place = await currentPlace();
+  const page = Math.max(1, num(sp.page) ?? 1);
   const { items, total } = await getListings({
     category: slug,
     subcategory: sub,
+    place: place?.slug,
     sort: (sort as ListingFilter["sort"]) ?? "newest",
-    take: 48,
+    minPrice: num(sp.minPrice),
+    maxPrice: num(sp.maxPrice),
+    take: PAGE_SIZE,
+    skip: (page - 1) * PAGE_SIZE,
   });
 
   const activeSub = sub ? cat.subcategories.find((s) => s.slug === sub) : null;
@@ -52,7 +74,10 @@ export default async function CategoryPage({
           <h1 className="text-3xl font-bold tracking-tight text-ink">
             {activeSub ? activeSub.name : cat.name}
           </h1>
-          <p className="text-sm text-slate-500">{cat.blurb}</p>
+          <p className="text-sm text-slate-500">
+            {cat.blurb}
+            {place ? ` · ${place.label}` : ""}
+          </p>
         </div>
       </div>
 
@@ -60,16 +85,27 @@ export default async function CategoryPage({
         <SubcategoryChips category={cat} active={sub} />
       </div>
 
-      <div className="mt-6 flex items-center justify-between border-b border-slate-200 pb-4">
+      <div className="mt-6 flex flex-col gap-4 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm text-slate-500">
           {total.toLocaleString()} {total === 1 ? "listing" : "listings"}
         </p>
-        <SortSelect />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+          <PriceFilter />
+          <SortSelect />
+        </div>
       </div>
 
       <div className="mt-8">
         <ListingGrid listings={items} />
       </div>
+
+      <Pagination
+        total={total}
+        pageSize={PAGE_SIZE}
+        page={page}
+        searchParams={sp}
+        basePath={`/category/${slug}`}
+      />
     </div>
   );
 }

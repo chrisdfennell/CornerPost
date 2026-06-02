@@ -8,6 +8,13 @@ export function formatPrice(price: number | null | undefined): string {
   }).format(price);
 }
 
+/** Label for a closed listing, tuned to the category ("Sold" vs "Filled"). */
+export function closedLabel(category: string): string {
+  if (category === "jobs" || category === "gigs") return "Filled";
+  if (category === "for-sale" || category === "housing") return "Sold";
+  return "Closed";
+}
+
 export function timeAgo(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
   const seconds = Math.floor((Date.now() - d.getTime()) / 1000);

@@ -1,11 +1,14 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getListing, getListings } from "@/lib/listings";
+import { getListing, getListings, listingImages } from "@/lib/listings";
 import { getCategory, getSubcategory, CONDITIONS } from "@/lib/categories";
-import { formatPrice, timeAgo } from "@/lib/format";
+import { getPlace } from "@/lib/places";
+import { formatPrice, timeAgo, closedLabel } from "@/lib/format";
 import { ContactReveal } from "@/components/ContactReveal";
 import { ListingCard } from "@/components/ListingCard";
+import { FavoriteButton } from "@/components/FavoriteButton";
+import { ReportButton } from "@/components/ReportButton";
+import { Gallery } from "@/components/Gallery";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +20,27 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const listing = await getListing(id);
-  return { title: listing ? `${listing.title} · CornerPost` : "CornerPost" };
+  if (!listing) return { title: "Not found" };
+
+  const description = listing.description.slice(0, 200);
+  const images = listing.imageUrl ? [listing.imageUrl] : undefined;
+  return {
+    title: listing.title,
+    description,
+    openGraph: {
+      type: "website",
+      title: listing.title,
+      description,
+      url: `/listing/${listing.id}`,
+      images,
+    },
+    twitter: {
+      card: images ? "summary_large_image" : "summary",
+      title: listing.title,
+      description,
+      images,
+    },
+  };
 }
 
 export default async function ListingPage({
@@ -31,18 +54,44 @@ export default async function ListingPage({
 
   const cat = getCategory(listing.category);
   const sub = getSubcategory(listing.category, listing.subcategory);
+  const closed = listing.status !== "active";
+  const images = listingImages(listing);
   const conditionName = CONDITIONS.find(
     (c) => c.slug === listing.condition
   )?.name;
 
+  const place = getPlace(listing.place);
   const { items: related } = await getListings({
     category: listing.category,
+    place: listing.place,
     take: 5,
   });
   const relatedOthers = related.filter((l) => l.id !== listing.id).slice(0, 4);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: listing.title,
+    description: listing.description,
+    ...(listing.imageUrl ? { image: listing.imageUrl } : {}),
+    ...(listing.price != null
+      ? {
+          offers: {
+            "@type": "Offer",
+            price: listing.price,
+            priceCurrency: "USD",
+            availability: "https://schema.org/InStock",
+          },
+        }
+      : {}),
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Breadcrumb */}
       <nav className="flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
         <Link href="/" className="hover:text-brand-600">
@@ -70,27 +119,13 @@ export default async function ListingPage({
       <div className="mt-5 grid grid-cols-1 gap-8 lg:grid-cols-[1.6fr_1fr]">
         {/* Main */}
         <div>
-          <div className="relative aspect-[16/10] overflow-hidden rounded-3xl border border-slate-200 bg-slate-100">
-            {listing.imageUrl ? (
-              <Image
-                src={listing.imageUrl}
-                alt={listing.title}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 60vw"
-                className="object-cover"
-              />
-            ) : (
-              <div className="grid h-full w-full place-items-center text-7xl">
-                {cat?.icon ?? "📦"}
-              </div>
-            )}
-            {listing.featured && (
-              <span className="absolute left-4 top-4 rounded-full bg-amber-400/95 px-3 py-1 text-sm font-bold text-amber-950 shadow-sm backdrop-blur">
-                ★ Featured
-              </span>
-            )}
-          </div>
+          <Gallery
+            images={images}
+            alt={listing.title}
+            featured={listing.featured}
+            closedLabel={closed ? closedLabel(listing.category) : undefined}
+            fallbackIcon={cat?.icon ?? "📦"}
+          />
 
           <div className="mt-6">
             <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
@@ -138,6 +173,16 @@ export default async function ListingPage({
                   <dd className="font-medium text-ink">{conditionName}</dd>
                 </div>
               )}
+              {place && (
+                <div className="flex justify-between">
+                  <dt className="text-slate-500">Area</dt>
+                  <dd className="font-medium text-ink">
+                    <Link href={`/api/place?slug=${place.slug}&next=/browse`} className="hover:text-brand-600">
+                      {place.label}
+                    </Link>
+                  </dd>
+                </div>
+              )}
               <div className="flex justify-between">
                 <dt className="text-slate-500">Location</dt>
                 <dd className="font-medium text-ink">{listing.location}</dd>
@@ -145,10 +190,13 @@ export default async function ListingPage({
             </dl>
           </div>
 
-          <ContactReveal
-            name={listing.contactName}
-            email={listing.contactEmail}
-          />
+          <ContactReveal listingId={listing.id} name={listing.contactName} />
+
+          <div className="flex justify-center">
+            <FavoriteButton listingId={listing.id} variant="detail" />
+          </div>
+
+          <ReportButton listingId={listing.id} />
         </aside>
       </div>
 

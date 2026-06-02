@@ -14,16 +14,41 @@ model Listing {
   price       Int? // in whole currency units; null = "contact"/free/NA
   category    String // top-level category slug, e.g. "for-sale"
   subcategory String // subcategory slug, e.g. "electronics"
-  location    String
+  place       String // metro slug from places.ts, e.g. "seattle"
+  location    String // free-text display location, e.g. "Capitol Hill" or "Remote"
   condition   String? // e.g. "new", "like-new", "good", "fair"
-  imageUrl    String?
+  imageUrl    String? // cover image (first of images); kept for cards/OG
+  images      String? // JSON array of all image URLs (SQLite has no String[])
   contactName String
   contactEmail String
   featured    Boolean  @default(false)
+  // active = live; closed = sold/filled but kept visible on its own page.
+  status      String   @default("active")
+  reports     Report[]
+  // Secret token returned to the poster so they can edit/delete without an account.
+  editToken   String   @default(cuid())
+  // When the listing stops showing in public queries. null = never expires.
+  expiresAt   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([category])
   @@index([subcategory])
+  @@index([place])
   @@index([createdAt])
+  @@index([expiresAt])
+  @@index([status])
+}
+
+model Report {
+  id         String   @id @default(cuid())
+  listingId  String
+  listing    Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  reason     String // e.g. "spam", "scam", "prohibited", "miscategorized", "other"
+  detail     String?
+  resolved   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([resolved])
+  @@index([listingId])
 }

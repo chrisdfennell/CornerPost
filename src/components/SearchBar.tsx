@@ -30,16 +30,16 @@ export function SearchBar({
     <form
       onSubmit={submit}
       role="search"
-      className={`flex w-full items-center gap-2 rounded-full border border-slate-200 bg-white pl-4 pr-2 ${
+      className={`flex w-full items-center gap-2 rounded-full border border-slate-200 bg-white pl-4 pr-2 dark:border-slate-800 dark:bg-slate-900 ${
         big ? "h-14 text-base card-shadow" : "h-11 text-sm"
-      } focus-within:border-brand-400 focus-within:ring-4 focus-within:ring-brand-100 transition`}
+      } focus-within:border-brand-400 focus-within:ring-4 focus-within:ring-brand-100 dark:focus-within:ring-brand-900/30 transition`}
     >
       <svg
         width={big ? 22 : 18}
         height={big ? 22 : 18}
         viewBox="0 0 24 24"
         fill="none"
-        className="shrink-0 text-slate-400"
+        className="shrink-0 text-slate-400 dark:text-slate-500"
         aria-hidden="true"
       >
         <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
@@ -55,7 +55,7 @@ export function SearchBar({
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Search listings, e.g. ‘road bike’, ‘1BR apartment’…"
-        className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-slate-400"
+        className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
         aria-label="Search listings"
       />
       <button

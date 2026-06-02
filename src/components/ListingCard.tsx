@@ -24,9 +24,9 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
   return (
     <Link
       href={`/listing/${listing.id}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white card-shadow transition-all duration-200 hover:-translate-y-1 hover:card-shadow-hover"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white card-shadow transition-all duration-200 hover:-translate-y-1 hover:card-shadow-hover dark:border-slate-800 dark:bg-slate-900/50"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+      <div className="relative aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-slate-800">
         {listing.imageUrl ? (
           <Image
             src={listing.imageUrl}
@@ -57,22 +57,22 @@ export function ListingCard({ listing }: { listing: ListingCardData }) {
           </span>
         )}
 
-        <span className="absolute bottom-3 left-3 rounded-full bg-white/95 px-3 py-1 text-sm font-bold text-ink shadow-sm backdrop-blur">
+        <span className="absolute bottom-3 left-3 rounded-full bg-white/95 px-3 py-1 text-sm font-bold text-ink shadow-sm backdrop-blur dark:bg-slate-950/90 dark:text-white">
           {formatPrice(listing.price)}
         </span>
       </div>
 
       <div className="flex flex-1 flex-col gap-1 p-4">
         {cat && (
-          <span className="inline-flex w-fit items-center gap-1 text-xs font-medium text-slate-400">
+          <span className="inline-flex w-fit items-center gap-1 text-xs font-medium text-slate-400 dark:text-slate-500">
             <span className={`h-2 w-2 rounded-full ${cat.accent}`} />
             {cat.name}
           </span>
         )}
-        <h3 className="line-clamp-2 font-semibold leading-snug text-ink transition-colors group-hover:text-brand-700">
+        <h3 className="line-clamp-2 font-semibold leading-snug text-ink transition-colors group-hover:text-brand-700 dark:group-hover:text-brand-400">
           {listing.title}
         </h3>
-        <div className="mt-auto flex items-center justify-between pt-2 text-xs text-slate-400">
+        <div className="mt-auto flex items-center justify-between pt-2 text-xs text-slate-400 dark:text-slate-500">
           <span className="inline-flex items-center gap-1 truncate">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path

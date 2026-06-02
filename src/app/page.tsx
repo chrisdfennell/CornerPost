@@ -22,19 +22,19 @@ export default async function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="hero-mesh border-b border-slate-200">
+      <section className="hero-mesh border-b border-slate-200 dark:border-slate-800/80">
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-sm font-medium text-slate-600 backdrop-blur">
+            <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-sm font-medium text-slate-600 backdrop-blur dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
               <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
               {totalListings.toLocaleString()} live listings
               {place ? ` in ${place.name}` : " near you"}
             </span>
             <h1 className="mt-5 text-4xl font-extrabold leading-tight tracking-tight text-ink sm:text-6xl">
               Your corner of the
-              <span className="text-brand-600"> local market</span>.
+              <span className="text-brand-600 dark:text-brand-500"> local market</span>.
             </h1>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-slate-600">
+            <p className="mx-auto mt-4 max-w-xl text-lg text-slate-600 dark:text-slate-400">
               Buy, sell, rent, hire, and connect with the people around you — on
               a classifieds board that doesn’t look like it’s from 1999.
             </p>
@@ -43,7 +43,7 @@ export default async function HomePage() {
               <SearchBar size="lg" />
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-sm text-slate-500">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
               <span>Popular:</span>
               {["electronics", "apartments", "engineering", "free"].map((s) => {
                 const label =
@@ -54,7 +54,7 @@ export default async function HomePage() {
                   <Link
                     key={s}
                     href={`/search?q=${s}`}
-                    className="rounded-full bg-white/80 px-3 py-1 font-medium text-slate-600 ring-1 ring-slate-200 transition hover:text-brand-700 hover:ring-brand-300"
+                    className="rounded-full bg-white/80 px-3 py-1 font-medium text-slate-600 ring-1 ring-slate-200 transition hover:text-brand-700 hover:ring-brand-300 dark:bg-slate-900/80 dark:text-slate-300 dark:ring-slate-800 dark:hover:text-brand-400 dark:hover:ring-brand-500/50"
                   >
                     {label}
                   </Link>
@@ -74,7 +74,7 @@ export default async function HomePage() {
             </h2>
             <Link
               href="/browse"
-              className="text-sm font-semibold text-brand-600 hover:text-brand-700"
+              className="text-sm font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-500 dark:hover:text-brand-400"
             >
               See everything →
             </Link>
@@ -85,14 +85,14 @@ export default async function HomePage() {
               <Link
                 key={c.slug}
                 href={`/category/${c.slug}`}
-                className="group relative flex flex-col gap-2 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 card-shadow transition-all hover:-translate-y-1 hover:card-shadow-hover"
+                className="group relative flex flex-col gap-2 overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 card-shadow transition-all hover:-translate-y-1 hover:card-shadow-hover dark:border-slate-800 dark:bg-slate-900/50"
               >
                 <span
                   className={`absolute -right-6 -top-6 h-16 w-16 rounded-full ${c.accent} opacity-10 transition-transform group-hover:scale-150`}
                 />
                 <span className="text-3xl">{c.icon}</span>
                 <span className="font-semibold text-ink">{c.name}</span>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-slate-400 dark:text-slate-500">
                   {(counts[c.slug] ?? 0).toLocaleString()} listings
                 </span>
               </Link>

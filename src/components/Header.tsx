@@ -2,14 +2,17 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Logo } from "./Logo";
 import { SearchBar } from "./SearchBar";
+import { ThemeToggle } from "./ThemeToggle";
 import { CATEGORIES } from "@/lib/categories";
 import { currentPlace } from "@/lib/place-server";
+import { getCurrentUser } from "@/lib/auth";
+
 
 function PlacePicker({ label }: { label: string }) {
   return (
     <Link
       href="/places"
-      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-brand-300 hover:text-brand-700"
+      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-brand-500/50 dark:hover:text-brand-400"
       aria-label="Change location"
     >
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -17,7 +20,7 @@ function PlacePicker({ label }: { label: string }) {
         <circle cx="12" cy="10" r="2.5" fill="currentColor" />
       </svg>
       {label}
-      <span className="text-slate-300">▾</span>
+      <span className="text-slate-300 dark:text-slate-600">▾</span>
     </Link>
   );
 }
@@ -25,14 +28,16 @@ function PlacePicker({ label }: { label: string }) {
 // SearchBar reads useSearchParams, which needs a Suspense boundary so pages
 // that are statically generated (e.g. the 404) don't bail out of prerendering.
 const searchFallback = (
-  <div className="h-11 w-full rounded-full border border-slate-200 bg-white" />
+  <div className="h-11 w-full rounded-full border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900" />
 );
 
 export async function Header() {
   const place = await currentPlace();
+  const user = await getCurrentUser();
+
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/80 backdrop-blur-md dark:border-slate-800/70 dark:bg-slate-950/80">
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
         <Logo />
 
@@ -42,31 +47,61 @@ export async function Header() {
           </Suspense>
         </div>
 
-        <Link
-          href="/favorites"
-          aria-label="Saved listings"
-          className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-500 md:ml-0"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M12 21s-7-4.6-9.3-9C1 8.5 2.5 5 6 5c2 0 3.2 1.1 4 2.3C10.8 6.1 12 5 14 5c3.5 0 5 3.5 3.3 7-2.3 4.4-9.3 9-9.3 9Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-          </svg>
-          <span className="hidden sm:inline">Saved</span>
-        </Link>
+        <div className="ml-auto flex items-center gap-3 md:ml-0">
+          <Link
+            href="/favorites"
+            aria-label="Saved listings"
+            className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-rose-200 hover:text-rose-500 dark:border-slate-800 dark:text-slate-400 dark:hover:border-rose-900/50 dark:hover:text-rose-400"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 21s-7-4.6-9.3-9C1 8.5 2.5 5 6 5c2 0 3.2 1.1 4 2.3C10.8 6.1 12 5 14 5c3.5 0 5 3.5 3.3 7-2.3 4.4-9.3 9-9.3 9Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+            </svg>
+            <span className="hidden sm:inline">Saved</span>
+          </Link>
 
-        <Link
-          href="/post"
-          className="inline-flex items-center gap-1.5 rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 active:scale-95"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M12 5v14M5 12h14"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-          </svg>
-          Post
-        </Link>
+          {user ? (
+            <Link
+              href="/dashboard"
+              aria-label="Personal Dashboard"
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-650 dark:border-slate-800 dark:text-slate-400 dark:hover:border-brand-900/50 dark:hover:text-brand-450"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              <span className="hidden sm:inline">My Account</span>
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              aria-label="Sign In"
+              className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-brand-200 hover:text-brand-650 dark:border-slate-800 dark:text-slate-400 dark:hover:border-brand-900/50 dark:hover:text-brand-450"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3" />
+              </svg>
+              <span className="hidden sm:inline">Sign In</span>
+            </Link>
+          )}
+
+          <ThemeToggle />
+
+
+          <Link
+            href="/post"
+            className="inline-flex items-center gap-1.5 rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 active:scale-95"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M12 5v14M5 12h14"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+            </svg>
+            Post
+          </Link>
+        </div>
       </div>
 
       {/* Mobile search */}
@@ -77,13 +112,13 @@ export async function Header() {
       </div>
 
       {/* Category strip */}
-      <nav className="border-t border-slate-100 bg-white/60">
+      <nav className="border-t border-slate-100 bg-white/60 dark:border-slate-800 dark:bg-slate-950/60">
         <div className="mx-auto flex max-w-7xl items-center gap-1 overflow-x-auto px-4 py-2 sm:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <PlacePicker label={place ? place.label : "Choose location"} />
-          <span className="mx-1 h-5 w-px shrink-0 bg-slate-200" />
+          <span className="mx-1 h-5 w-px shrink-0 bg-slate-200 dark:bg-slate-800" />
           <Link
             href="/browse"
-            className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-ink"
+            className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white"
           >
             All
           </Link>
@@ -91,7 +126,7 @@ export async function Header() {
             <Link
               key={c.slug}
               href={`/category/${c.slug}`}
-              className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-ink"
+              className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-ink dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white"
             >
               <span className="mr-1">{c.icon}</span>
               {c.name}

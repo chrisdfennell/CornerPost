@@ -4,6 +4,7 @@ import { ListingGrid } from "@/components/ListingGrid";
 import { SortSelect } from "@/components/SortSelect";
 import { PriceFilter } from "@/components/PriceFilter";
 import { Pagination } from "@/components/Pagination";
+import { AlertSignup } from "@/components/AlertSignup";
 import type { ListingFilter } from "@/lib/listings";
 
 export const dynamic = "force-dynamic";
@@ -41,20 +42,20 @@ export default async function SearchPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 dark:border-slate-800">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-ink">
               {query ? (
                 <>
                   Results for{" "}
-                  <span className="text-brand-600">“{query}”</span>
+                  <span className="text-brand-600 dark:text-brand-500">“{query}”</span>
                 </>
               ) : (
                 "Search"
               )}
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               {total.toLocaleString()} {total === 1 ? "match" : "matches"}
               {place ? ` in ${place.label}` : ""}
             </p>
@@ -64,8 +65,19 @@ export default async function SearchPage({
         <PriceFilter />
       </div>
 
-      <div className="mt-8">
-        <ListingGrid listings={items} />
+      <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px]">
+        <div className="min-w-0">
+          <ListingGrid listings={items} />
+        </div>
+        <aside className="space-y-4">
+          {place && query && (
+            <AlertSignup
+              query={query}
+              placeSlug={place.slug}
+              placeLabel={place.label}
+            />
+          )}
+        </aside>
       </div>
 
       <Pagination

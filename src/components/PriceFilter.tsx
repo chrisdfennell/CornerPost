@@ -37,7 +37,7 @@ export function PriceFilter() {
   return (
     <form
       onSubmit={apply}
-      className="inline-flex items-center gap-2 text-sm text-slate-500"
+      className="inline-flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400"
     >
       <span className="font-medium">Price</span>
       <input
@@ -48,9 +48,9 @@ export function PriceFilter() {
         onChange={(e) => setMin(e.target.value)}
         placeholder="Min"
         aria-label="Minimum price"
-        className="w-20 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-ink outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+        className="w-20 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-ink outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100 dark:border-slate-800 dark:bg-slate-900 dark:focus:ring-brand-900/30"
       />
-      <span className="text-slate-300">–</span>
+      <span className="text-slate-300 dark:text-slate-700">–</span>
       <input
         type="number"
         min={0}
@@ -59,7 +59,7 @@ export function PriceFilter() {
         onChange={(e) => setMax(e.target.value)}
         placeholder="Max"
         aria-label="Maximum price"
-        className="w-20 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-ink outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+        className="w-20 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-ink outline-none transition focus:border-brand-400 focus:ring-2 focus:ring-brand-100 dark:border-slate-800 dark:bg-slate-900 dark:focus:ring-brand-900/30"
       />
       <button
         type="submit"
@@ -71,7 +71,7 @@ export function PriceFilter() {
         <button
           type="button"
           onClick={clear}
-          className="font-medium text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline"
+          className="font-medium text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline dark:hover:text-slate-300"
         >
           Clear
         </button>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getListingForOwner, expiryFromNow } from "@/lib/listings";
+import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,8 @@ export async function POST(
     /* fall through to token check */
   }
 
-  const owned = await getListingForOwner(id, token);
+  const currentUser = await getCurrentUser();
+  const owned = await getListingForOwner(id, token, currentUser?.email);
   if (!owned) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -28,3 +30,4 @@ export async function POST(
 
   return NextResponse.json({ ok: true, expiresAt });
 }
+

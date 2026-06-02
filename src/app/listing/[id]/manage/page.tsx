@@ -1,9 +1,14 @@
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 import { getListingForOwner, listingImages } from "@/lib/listings";
 import { PostForm } from "@/app/post/PostForm";
 import { ManageActions } from "./ManageActions";
+import { AnalyticsChart } from "@/components/AnalyticsChart";
+import { bucketViewsByDate } from "@/lib/analytics";
 import { closedLabel } from "@/lib/format";
 import type { Metadata } from "next";
+import { getCurrentUser } from "@/lib/auth";
+
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +27,8 @@ export default async function ManageListingPage({
   const { id } = await params;
   const { token = "", posted } = await searchParams;
 
-  const listing = await getListingForOwner(id, token);
+  const user = await getCurrentUser();
+  const listing = await getListingForOwner(id, token, user?.email);
 
   if (!listing) {
     return (
@@ -45,16 +51,39 @@ export default async function ManageListingPage({
     );
   }
 
+  // Generate date ranges for the last 7 calendar days
+  const now = new Date();
+  const past7Days = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date();
+    d.setDate(now.getDate() - (6 - i));
+    return d;
+  });
+
+  const startDate = new Date(past7Days[0]);
+  startDate.setHours(0, 0, 0, 0);
+
+  // Retrieve matching view records for the listing
+  const views = await prisma.listingView.findMany({
+    where: {
+      listingId: id,
+      createdAt: { gte: startDate },
+    },
+    select: { createdAt: true },
+  });
+
+  // Bucket views by date using helper
+  const chartData = bucketViewsByDate(views, past7Days);
+
   const expired = listing.expiresAt && listing.expiresAt.getTime() <= Date.now();
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
       {posted && (
-        <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4">
-          <p className="font-semibold text-emerald-800">
+        <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 dark:border-emerald-950/50 dark:bg-emerald-950/20">
+          <p className="font-semibold text-emerald-800 dark:text-emerald-450">
             🎉 Your listing is live!
           </p>
-          <p className="mt-1 text-sm text-emerald-700">
+          <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-500">
             <strong>Bookmark this page</strong> — it’s the only way to edit or
             delete your listing later. We don’t use accounts.
           </p>
@@ -67,12 +96,12 @@ export default async function ManageListingPage({
         </h1>
         <Link
           href={`/listing/${listing.id}`}
-          className="text-sm font-semibold text-brand-600 hover:text-brand-700"
+          className="text-sm font-semibold text-brand-600 hover:text-brand-700 dark:text-brand-500 dark:hover:text-brand-400"
         >
           View public page →
         </Link>
       </div>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
         {expired
           ? "This listing has expired and is hidden — renew it to show it again."
           : listing.expiresAt
@@ -89,6 +118,10 @@ export default async function ManageListingPage({
         />
       </div>
 
+      <div className="mt-8">
+        <AnalyticsChart data={chartData} />
+      </div>
+
       <h2 className="mt-10 text-lg font-bold tracking-tight text-ink">
         Edit details
       </h2>
@@ -96,6 +129,7 @@ export default async function ManageListingPage({
         <PostForm
           editToken={token}
           uploadsEnabled={Boolean(process.env.UPLOADTHING_TOKEN)}
+          sessionUser={user ? { email: user.email, name: user.name ?? "" } : undefined}
           listing={{
             id: listing.id,
             title: listing.title,
@@ -111,6 +145,7 @@ export default async function ManageListingPage({
             contactEmail: listing.contactEmail,
           }}
         />
+
       </div>
     </div>
   );

@@ -39,13 +39,13 @@ export default async function BrowsePage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 dark:border-slate-800">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-ink">
               All listings
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               {total.toLocaleString()} listings across every category
               {place ? ` in ${place.label}` : ""}
             </p>

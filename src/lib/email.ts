@@ -63,3 +63,25 @@ function escapeHtml(s: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
+
+/** Email the user their one-time passcode for secure passwordless login. */
+export async function sendLoginOtpEmail(opts: { to: string; token: string }) {
+  const subject = `Your CornerPost sign-in code: ${opts.token}`;
+  const text = [
+    `Your CornerPost login verification code is: ${opts.token}`,
+    ``,
+    `Enter this code on the verification screen. This code will expire in 10 minutes.`,
+    `If you did not request this, you can safely ignore this email.`,
+  ].join("\n");
+  const html = `
+    <div style="font-family:system-ui,sans-serif;max-width:480px;padding:20px;border:1px solid #e2e8f0;border-radius:16px">
+      <h2 style="margin:0 0 12px;color:#0f172a">Sign in to CornerPost 📮</h2>
+      <p style="color:#475569;font-size:15px;line-height:1.5">Enter the following verification code to log in to your account. This code is valid for 10 minutes.</p>
+      <div style="margin:24px 0;background:#f8fafc;padding:16px;border-radius:12px;text-align:center">
+        <span style="font-family:monospace;font-size:32px;font-weight:700;letter-spacing:6px;color:#4f46e5">${opts.token}</span>
+      </div>
+      <p style="color:#94a3b8;font-size:13px;margin:20px 0 0">If you did not request this code, you can safely ignore this email.</p>
+    </div>`;
+  return sendEmail({ to: opts.to, subject, html, text });
+}
+

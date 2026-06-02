@@ -7,9 +7,9 @@ import { STATES, PLACES } from "@/lib/places";
 import { ImageUploader } from "@/components/ImageUploader";
 
 const inputClass =
-  "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-100";
+  "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-ink outline-none transition placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-100 dark:border-slate-800 dark:bg-slate-950 dark:placeholder:text-slate-500 dark:focus:ring-brand-900/30";
 
-const labelClass = "block text-sm font-semibold text-ink";
+const labelClass = "block text-sm font-semibold text-ink dark:text-slate-200";
 
 export type PostFormListing = {
   id: string;
@@ -31,11 +31,13 @@ export function PostForm({
   editToken,
   defaultPlace,
   uploadsEnabled = false,
+  sessionUser,
 }: {
   listing?: PostFormListing;
   editToken?: string;
   defaultPlace?: string;
   uploadsEnabled?: boolean;
+  sessionUser?: { email: string; name: string };
 }) {
   const router = useRouter();
   const isEdit = Boolean(listing && editToken);
@@ -120,7 +122,7 @@ export function PostForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 card-shadow sm:p-8"
+      className="space-y-6 rounded-3xl border border-slate-200 bg-white p-6 card-shadow sm:p-8 dark:border-slate-800 dark:bg-slate-900/50"
     >
       {/* Honeypot — hidden from real users, catches naive bots. */}
       <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
@@ -289,7 +291,7 @@ export function PostForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 border-t border-slate-100 pt-6 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 border-t border-slate-100 pt-6 dark:border-slate-800 sm:grid-cols-2">
         <div>
           <label className={labelClass} htmlFor="contactName">
             Your name
@@ -299,29 +301,30 @@ export function PostForm({
             name="contactName"
             required
             maxLength={80}
-            defaultValue={listing?.contactName}
+            defaultValue={listing?.contactName ?? sessionUser?.name ?? ""}
             placeholder="Jamie"
             className={`${inputClass} mt-1.5`}
           />
         </div>
         <div>
           <label className={labelClass} htmlFor="contactEmail">
-            Contact email
+            Contact email {sessionUser?.email && <span className="text-emerald-600 dark:text-emerald-450 font-normal">(Verified Account)</span>}
           </label>
           <input
             id="contactEmail"
             name="contactEmail"
             type="email"
             required
-            defaultValue={listing?.contactEmail}
+            readOnly={Boolean(sessionUser?.email)}
+            defaultValue={listing?.contactEmail ?? sessionUser?.email ?? ""}
             placeholder="you@example.com"
-            className={`${inputClass} mt-1.5`}
+            className={`${inputClass} mt-1.5 ${sessionUser?.email ? "bg-slate-50 dark:bg-slate-900/50 cursor-not-allowed opacity-80" : ""}`}
           />
         </div>
       </div>
 
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700 dark:border-rose-950/50 dark:bg-rose-950/20 dark:text-rose-400">
           {error}
         </div>
       )}

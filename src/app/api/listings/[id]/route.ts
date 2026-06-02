@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getListing, getListingForOwner, expiryFromNow } from "@/lib/listings";
 import { getCategory, getSubcategory } from "@/lib/categories";
 import { isValidPlace } from "@/lib/places";
+import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ export async function GET(
 }
 
 const UpdateSchema = z.object({
-  token: z.string().min(1, "Missing edit token"),
+  token: z.string().trim().optional(),
   title: z.string().trim().min(3, "Title is too short").max(120),
   description: z.string().trim().min(10, "Add a few more details").max(5000),
   price: z
@@ -61,7 +62,8 @@ export async function PATCH(
   }
   const data = parsed.data;
 
-  const owned = await getListingForOwner(id, data.token);
+  const currentUser = await getCurrentUser();
+  const owned = await getListingForOwner(id, data.token, currentUser?.email);
   if (!owned) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -105,7 +107,8 @@ export async function DELETE(
   const { id } = await params;
   const token = req.nextUrl.searchParams.get("token") ?? "";
 
-  const owned = await getListingForOwner(id, token);
+  const currentUser = await getCurrentUser();
+  const owned = await getListingForOwner(id, token, currentUser?.email);
   if (!owned) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

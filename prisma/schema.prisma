@@ -25,6 +25,8 @@ model Listing {
   // active = live; closed = sold/filled but kept visible on its own page.
   status      String   @default("active")
   reports     Report[]
+  conversations Conversation[]
+  views       ListingView[]
   // Secret token returned to the poster so they can edit/delete without an account.
   editToken   String   @default(cuid())
   // When the listing stops showing in public queries. null = never expires.
@@ -52,3 +54,81 @@ model Report {
   @@index([resolved])
   @@index([listingId])
 }
+
+model Conversation {
+  id          String    @id @default(cuid())
+  listingId   String
+  listing     Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerName   String
+  buyerEmail  String
+  buyerToken  String    @default(cuid())
+  sellerToken String    @default(cuid())
+  messages    Message[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([listingId])
+  @@index([buyerToken])
+  @@index([sellerToken])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         String       // "buyer" or "seller"
+  content        String
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+}
+
+model ListingView {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
+  @@index([createdAt])
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  email     String
+  query     String   // search query keyword
+  place     String   // metro slug, e.g. "seattle"
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([place])
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  sessions  Session[]
+}
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique // 6-digit passcode e.g. "123456"
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique // Secure random token
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+

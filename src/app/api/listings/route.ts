@@ -5,7 +5,9 @@ import { getListings, PAGE_SIZE, expiryFromNow } from "@/lib/listings";
 import { getCategory, getSubcategory } from "@/lib/categories";
 import { isValidPlace } from "@/lib/places";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
-import { sendManageLinkEmail } from "@/lib/email";
+import { sendManageLinkEmail, sendEmail } from "@/lib/email";
+import { SITE_URL } from "@/lib/site";
+import { isAlertMatch } from "@/lib/subscriptions";
 import type { ListingFilter } from "@/lib/listings";
 
 export const dynamic = "force-dynamic";
@@ -140,9 +142,85 @@ export async function POST(req: NextRequest) {
     editToken: listing.editToken,
   });
 
+  // Trigger real-time saved search alert sweep for buyers (best-effort)
+  await triggerAlertSweep({
+    id: listing.id,
+    title: listing.title,
+    description: listing.description,
+    place: listing.place,
+    price: listing.price,
+    location: listing.location,
+  });
+
   // editToken is returned ONCE so the poster can manage their listing later.
   return NextResponse.json(
     { listing: { id: listing.id }, editToken: listing.editToken },
     { status: 201 }
   );
+}
+
+async function triggerAlertSweep(listing: {
+  id: string;
+  title: string;
+  description: string;
+  place: string;
+  price: number | null;
+  location: string;
+}) {
+  try {
+    const subs = await prisma.subscription.findMany({
+      where: { place: listing.place },
+    });
+
+    for (const sub of subs) {
+      if (isAlertMatch(listing, sub)) {
+        const subject = `Saved search alert match: "${sub.query}"`;
+        const listingUrl = `${SITE_URL}/listing/${listing.id}`;
+        const text = [
+          `Hi there,`,
+          ``,
+          `A new listing matching your saved search alert for "${sub.query}" has been posted in your area!`,
+          ``,
+          `Title: ${listing.title}`,
+          `Price: ${listing.price != null ? `$${listing.price}` : "Contact"}`,
+          `Location: ${listing.location}`,
+          ``,
+          `Click here to view the listing:`,
+          listingUrl,
+        ].join("\n");
+
+        const html = `
+          <div style="font-family:system-ui,sans-serif;max-width:480px">
+            <h3 style="margin:0 0 8px">Saved Search Alert Match! 🔔</h3>
+            <p style="color:#475569">A new listing matches your alert for <strong>“${escapeHtml(sub.query)}”</strong>:</p>
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:16px;border-radius:12px;margin:16px 0">
+              <p style="font-weight:700;margin:0 0 4px;font-size:16px">${escapeHtml(listing.title)}</p>
+              <p style="color:#10b981;font-weight:700;margin:0">${listing.price != null ? `$${listing.price}` : "Contact/Free"}</p>
+              <p style="color:#64748b;font-size:12px;margin:4px 0 0">${escapeHtml(listing.location)}</p>
+            </div>
+            <p style="margin:20px 0">
+              <a href="${listingUrl}" style="background:#4f46e5;color:#fff;padding:12px 20px;border-radius:9999px;text-decoration:none;font-weight:600;display:inline-block">View Listing Detail</a>
+            </p>
+            <p style="color:#94a3b8;font-size:11px">CornerPost notifications are secure and automated.</p>
+          </div>`;
+
+        await sendEmail({
+          to: sub.email,
+          subject,
+          text,
+          html,
+        });
+      }
+    }
+  } catch (err) {
+    console.error("[alerts] Background alert sweep failed:", err);
+  }
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }

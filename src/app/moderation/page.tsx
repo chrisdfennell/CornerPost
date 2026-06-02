@@ -19,7 +19,7 @@ function Notice({ title, body }: { title: string; body: string }) {
     <div className="mx-auto max-w-md px-4 py-20 text-center sm:px-6">
       <div className="text-5xl">🛡️</div>
       <h1 className="mt-4 text-2xl font-bold tracking-tight text-ink">{title}</h1>
-      <p className="mt-2 text-slate-500">{body}</p>
+      <p className="mt-2 text-slate-500 dark:text-slate-400">{body}</p>
     </div>
   );
 }
@@ -64,12 +64,12 @@ export default async function ModerationPage({
       <h1 className="text-3xl font-bold tracking-tight text-ink">
         Moderation queue
       </h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
         {reports.length} open {reports.length === 1 ? "report" : "reports"}
       </p>
 
       {reports.length === 0 ? (
-        <p className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-white/60 px-6 py-16 text-center text-slate-500">
+        <p className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-white/60 px-6 py-16 text-center text-slate-500 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400">
           🎉 Nothing to review. The queue is clear.
         </p>
       ) : (
@@ -80,30 +80,30 @@ export default async function ModerationPage({
             return (
               <li
                 key={r.id}
-                className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 card-shadow"
+                className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 card-shadow dark:border-slate-800 dark:bg-slate-900/50"
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-rose-700">
+                    <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-rose-700 dark:bg-rose-950/30 dark:text-rose-400">
                       {r.reason}
                     </span>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
                       {timeAgo(r.createdAt)}
                     </span>
                   </div>
                   <Link
                     href={`/listing/${r.listing.id}`}
-                    className="mt-1.5 block truncate font-semibold text-ink hover:text-brand-600"
+                    className="mt-1.5 block truncate font-semibold text-ink hover:text-brand-600 dark:hover:text-brand-455"
                   >
                     {r.listing.title}
                   </Link>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-400 dark:text-slate-550">
                     {cat?.name}
                     {place ? ` · ${place.label}` : ""}
                     {r.listing.status !== "active" ? ` · ${r.listing.status}` : ""}
                   </p>
                   {r.detail && (
-                    <p className="mt-2 text-sm text-slate-600">“{r.detail}”</p>
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-350">“{r.detail}”</p>
                   )}
                 </div>
                 <ModerationActions

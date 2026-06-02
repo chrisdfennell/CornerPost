@@ -3,7 +3,7 @@ import { ListingCard, type ListingCardData } from "./ListingCard";
 export function ListingGrid({ listings }: { listings: ListingCardData[] }) {
   if (listings.length === 0) {
     return (
-      <div className="grid place-items-center rounded-2xl border border-dashed border-slate-300 bg-white/60 px-6 py-20 text-center">
+      <div className="grid place-items-center rounded-2xl border border-dashed border-slate-300 bg-white/60 px-6 py-20 text-center dark:border-slate-800 dark:bg-slate-900/40">
         <div className="text-5xl">🔍</div>
         <h3 className="mt-4 text-lg font-semibold text-ink">
           Nothing here yet

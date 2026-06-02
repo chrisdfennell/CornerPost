@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getListingForOwner } from "@/lib/listings";
+import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 const Schema = z.object({
-  token: z.string().min(1),
+  token: z.string().trim().optional(),
   status: z.enum(["active", "closed"]),
 });
 
@@ -28,7 +29,8 @@ export async function POST(
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  const owned = await getListingForOwner(id, parsed.data.token);
+  const currentUser = await getCurrentUser();
+  const owned = await getListingForOwner(id, parsed.data.token, currentUser?.email);
   if (!owned) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -40,3 +42,4 @@ export async function POST(
 
   return NextResponse.json({ ok: true, status: parsed.data.status });
 }
+

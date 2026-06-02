@@ -21,7 +21,7 @@ export function Gallery({
 
   return (
     <div>
-      <div className="relative aspect-[16/10] overflow-hidden rounded-3xl border border-slate-200 bg-slate-100">
+      <div className="relative aspect-[16/10] overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-900">
         {current ? (
           <Image
             src={current}

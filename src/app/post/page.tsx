@@ -1,11 +1,13 @@
 import { PostForm } from "./PostForm";
 import { currentPlace } from "@/lib/place-server";
+import { getCurrentUser } from "@/lib/auth";
 
 export const metadata = { title: "Post a listing · CornerPost" };
 export const dynamic = "force-dynamic";
 
 export default async function PostPage() {
   const place = await currentPlace();
+  const user = await getCurrentUser();
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
@@ -21,8 +23,10 @@ export default async function PostPage() {
         <PostForm
           defaultPlace={place?.slug}
           uploadsEnabled={Boolean(process.env.UPLOADTHING_TOKEN)}
+          sessionUser={user ? { email: user.email, name: user.name ?? "" } : undefined}
         />
       </div>
     </div>
   );
 }
+

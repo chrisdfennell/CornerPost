@@ -90,16 +90,16 @@ export function ManageActions({
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 card-shadow">
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 card-shadow dark:border-slate-800 dark:bg-slate-900/50">
       <h2 className="font-semibold text-ink">Manage</h2>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
         Renew to reset the 30-day clock, or remove the listing entirely.
       </p>
       <div className="mt-4 flex flex-wrap gap-3">
         <button
           onClick={toggleStatus}
           disabled={busy !== "none"}
-          className="rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-ink transition hover:border-brand-300 hover:text-brand-700 disabled:opacity-60"
+          className="rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-ink transition hover:border-brand-300 hover:text-brand-700 disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-500/50 dark:hover:text-brand-400"
         >
           {busy === "status"
             ? "Updating…"
@@ -117,7 +117,7 @@ export function ManageActions({
         <button
           onClick={remove}
           disabled={busy !== "none"}
-          className="rounded-full border border-rose-200 bg-rose-50 px-5 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-60"
+          className="rounded-full border border-rose-200 bg-rose-50 px-5 py-2.5 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 disabled:opacity-60 dark:border-rose-950/50 dark:bg-rose-950/20 dark:text-rose-450 dark:hover:bg-rose-950/35"
         >
           {busy === "delete" ? "Deleting…" : "Delete listing"}
         </button>

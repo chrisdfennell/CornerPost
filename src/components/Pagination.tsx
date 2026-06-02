@@ -31,9 +31,9 @@ export function Pagination({
   };
 
   const linkClass =
-    "rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-brand-300 hover:text-brand-700";
+    "rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-ink transition hover:border-brand-300 hover:text-brand-700 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-500/50 dark:hover:text-brand-400";
   const disabledClass =
-    "rounded-lg border border-slate-100 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-300";
+    "rounded-lg border border-slate-100 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-300 dark:border-slate-900 dark:bg-slate-950 dark:text-slate-750";
 
   return (
     <nav
@@ -48,7 +48,7 @@ export function Pagination({
         <span className={disabledClass}>← Previous</span>
       )}
 
-      <span className="text-sm text-slate-500">
+      <span className="text-sm text-slate-500 dark:text-slate-400">
         Page {page} of {totalPages}
       </span>
 

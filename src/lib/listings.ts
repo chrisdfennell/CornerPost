@@ -163,13 +163,23 @@ export async function getListingContact(id: string) {
   });
 }
 
-/** Full listing, but only if the caller holds the matching edit token. */
-export async function getListingForOwner(id: string, token: string) {
-  if (!token) return null;
+/** Full listing, but only if the caller holds the matching edit token or matches user email. */
+export async function getListingForOwner(id: string, token?: string, userEmail?: string) {
   const listing = await prisma.listing.findUnique({ where: { id } });
-  if (!listing || listing.editToken !== token) return null;
-  return listing;
+  if (!listing) return null;
+
+  const matchesToken = Boolean(token && listing.editToken === token);
+  const matchesUser = Boolean(
+    userEmail && 
+    listing.contactEmail.trim().toLowerCase() === userEmail.trim().toLowerCase()
+  );
+
+  if (matchesToken || matchesUser) {
+    return listing;
+  }
+  return null;
 }
+
 
 export async function getCategoryCounts(place?: string) {
   const grouped = await prisma.listing.groupBy({

@@ -14,8 +14,8 @@ export function SubcategoryChips({
         href={`/category/${category.slug}`}
         className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
           !active
-            ? "bg-ink text-white"
-            : "bg-white text-slate-600 ring-1 ring-slate-200 hover:ring-brand-300"
+            ? "bg-ink text-white dark:bg-slate-100 dark:text-slate-950"
+            : "bg-white text-slate-600 ring-1 ring-slate-200 hover:ring-brand-300 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800 dark:hover:ring-brand-500/50"
         }`}
       >
         All {category.name}
@@ -28,8 +28,8 @@ export function SubcategoryChips({
             href={`/category/${category.slug}?sub=${s.slug}`}
             className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
               isActive
-                ? "bg-ink text-white"
-                : "bg-white text-slate-600 ring-1 ring-slate-200 hover:ring-brand-300"
+                ? "bg-ink text-white dark:bg-slate-100 dark:text-slate-950"
+                : "bg-white text-slate-600 ring-1 ring-slate-200 hover:ring-brand-300 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-800 dark:hover:ring-brand-500/50"
             }`}
           >
             {s.name}

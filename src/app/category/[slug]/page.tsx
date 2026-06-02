@@ -74,7 +74,7 @@ export default async function CategoryPage({
           <h1 className="text-3xl font-bold tracking-tight text-ink">
             {activeSub ? activeSub.name : cat.name}
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             {cat.blurb}
             {place ? ` · ${place.label}` : ""}
           </p>
@@ -85,8 +85,8 @@ export default async function CategoryPage({
         <SubcategoryChips category={cat} active={sub} />
       </div>
 
-      <div className="mt-6 flex flex-col gap-4 border-b border-slate-200 pb-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-slate-500">
+      <div className="mt-6 flex flex-col gap-4 border-b border-slate-200 pb-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           {total.toLocaleString()} {total === 1 ? "listing" : "listings"}
         </p>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
